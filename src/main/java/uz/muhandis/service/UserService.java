@@ -60,24 +60,42 @@ public class UserService {
         try (Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
              Statement statement = connection.createStatement()) {
             String query = "select * from users where username='" + user.getUsername() + "' and password='" + user.getPassword() + "';";
-            ResultSet resultSet = statement.executeQuery(query);
-            if (resultSet.next()) {
-                return new Result(
-                        "You are logged in",
-                        true,
-                        new User(
-                                resultSet.getInt(1),
-                                resultSet.getString(2),
-                                resultSet.getString(3),
-                                resultSet.getString(4),
-                                resultSet.getString(5)
-                        ));
-            } else return new Result("Wrong login or password", false);
+            return queryExecutor(query, statement);
 
         } catch (SQLException e) {
             e.printStackTrace();
             return new Result("Connection error", false);
         }
 
+    }
+    public Result loadUserByCookie(String username) throws ClassNotFoundException {
+        if (username.equals("") && username.isEmpty()) return new Result("Login not found", false);
+        Class.forName("org.postgresql.Driver");
+        try (Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+             Statement statement = connection.createStatement()) {
+            String query = "select * from users where username='" + username +"';";
+            return queryExecutor(query, statement);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new Result("Connection error", false);
+        }
+
+    }
+
+    private Result queryExecutor(String query, Statement statement) throws SQLException {
+        ResultSet resultSet = statement.executeQuery(query);
+        if (resultSet.next()) {
+            return new Result(
+                    "You are logged in",
+                    true,
+                    new User(
+                            resultSet.getInt(1),
+                            resultSet.getString(2),
+                            resultSet.getString(3),
+                            resultSet.getString(4),
+                            resultSet.getString(5)
+                    ));
+        } else return new Result("Wrong login or password", false);
     }
 }

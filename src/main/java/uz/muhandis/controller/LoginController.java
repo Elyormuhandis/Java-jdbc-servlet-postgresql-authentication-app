@@ -2,9 +2,7 @@ package uz.muhandis.controller;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.*;
 import uz.muhandis.model.Result;
 import uz.muhandis.model.User;
 import uz.muhandis.service.UserService;
@@ -32,12 +30,15 @@ public class LoginController extends HttpServlet {
         }
         PrintWriter printWriter = resp.getWriter();
         if (result.isSuccess()){
-            printWriter.write("<h1 style='color:green'>"+result.getMessage()+"</h1>");
-            printWriter.write("<h1 style='color:green'>"+"Your id is "+result.getUser().getId()+"</h1>");
-            printWriter.write("<h1 style='color:green'>"+"Your first name is "+result.getUser().getFirstName()+"</h1>");
-            printWriter.write("<h1 style='color:green'>"+"Your last name is "+result.getUser().getLastName()+"</h1>");
-            printWriter.write("<h1 style='color:green'>"+"Your login is "+result.getUser().getUsername()+"</h1>");
-            printWriter.write("<h1 style='color:green'>"+"Your phone is "+result.getUser().getPhoneNumber()+"</h1>");
+// With cookies
+//            Cookie cookie = new Cookie("authUser", result.getUser().getUsername());
+//            cookie.setMaxAge(60*60);
+//            resp.addCookie(cookie);
+            // With session
+            HttpSession session = req.getSession();
+            session.setAttribute("authUser", result.getUser().getUsername());
+            session.setMaxInactiveInterval(10); //10 sekunddan keyin sessiya o'chib ketadi va yana qayta login qilish talab etiladi
+            resp.sendRedirect("/cabinet");
         } else{
             printWriter.write("<h1 style='color:red'>"+result.getMessage()+"</h1>");
         }
